@@ -13,13 +13,14 @@ TODO:
 from __future__ import print_function
 from bs4 import BeautifulSoup
 import os
+import argparse
 
 class PCSParser:
     
     def __init__(self):
         #fd = open("newtest","r")
-        fd = os.popen("/usr/sbin/crm_mon -1 -r -f  -X").read()
         #pcs_xml = fd.read().replace('\n','')
+        fd = os.popen("/usr/sbin/crm_mon -1 -r -f  -X").read()
         pcs_xml = fd.replace('\n','')
         pcs_xml = pcs_xml.replace('<?xml version="1.0"?>','')
         self.pcs = BeautifulSoup(pcs_xml,"lxml")
@@ -50,11 +51,12 @@ class NagiosCheck:
     status = None
     message = ''
 
-    def __init__(self,pcsobj):
+    def __init__(self,pcsobj,args):
         self.pcs = pcsobj
+        self.args = args
 
     def validateNodes(self,pcs):
-        if len(pcs.getOnlineNodes()) != 2:
+        if len(pcs.getOnlineNodes()) != int(args.nodes_count):
             self.status = 'WARNING'
             self.message = self.message+"Number of online nodes is less than 2."
         else:
@@ -62,7 +64,7 @@ class NagiosCheck:
             self.message = self.message+"All 2 nodes are up and running."
     
     def validateResources(self,pcs):
-        if len(pcs.getOnlineResources()) != 7:
+        if len(pcs.getOnlineResources()) != int(args.resources_count):
             self.status = 'WARNING'
             self.message = self.message+"Number of online resources is less than 7."
         else:
@@ -75,7 +77,11 @@ class NagiosCheck:
         print(("%s - %s")% (self.status,self.message))
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("nodes_count", help="Number of active nodes expected")
+    parser.add_argument("resources_count",help="Number of active resources expected")
+    args = parser.parse_args()
     pcsobj = PCSParser()
-    nagioschk = NagiosCheck(pcsobj)
+    nagioschk = NagiosCheck(pcsobj,args)
     nagioschk.checkStatus()
     
