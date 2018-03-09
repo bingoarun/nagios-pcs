@@ -1,4 +1,7 @@
 # nagios-pcs
+
+[![Build Status](https://travis-ci.org/bingoarun/nagios-pcs.svg?branch=master)](https://travis-ci.org/bingoarun/nagios-pcs) 
+
 Nagios / Icinga monitoring plugin for Pacemaker
 
 ## Usage
